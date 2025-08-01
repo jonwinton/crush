@@ -56,3 +56,25 @@ func TestYourFunction(t *testing.T) {
   - If `goimports` is not available, use `gofmt`.
   - You can also use `task fmt` to run `gofumpt -w .` on the entire project,
     as long as `gofumpt` is on the `PATH`.
+
+## Configuration Options
+
+### Git Co-authoring
+
+By default, Crush adds co-authoring information to git commits and pull requests. You can disable this by setting the `enable_git_co_authoring` option to `false` in your configuration:
+
+```json
+{
+  "options": {
+    "enable_git_co_authoring": false
+  }
+}
+```
+
+When enabled (default), git commits will include:
+```
+💘 Generated with Crush
+Co-Authored-By: Crush <crush@charm.land>
+```
+
+When disabled, commits will use standard formatting without co-authoring information.
