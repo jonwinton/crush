@@ -116,9 +116,11 @@ var bannedCommands = []string{
 	"ufw",
 }
 
-func bashDescription() string {
+func (b *bashTool) bashDescription() string {
 	bannedCommandsStr := strings.Join(bannedCommands, ", ")
-	return fmt.Sprintf(`Executes a given bash command in a persistent shell session with optional timeout, ensuring proper handling and security measures.
+
+	// Base description without co-authoring
+	baseDescription := fmt.Sprintf(`Executes a given bash command in a persistent shell session with optional timeout, ensuring proper handling and security measures.
 
 CROSS-PLATFORM SHELL SUPPORT:
 * This tool uses a shell interpreter (mvdan/sh) that mimics the Bash language,
@@ -192,7 +194,11 @@ When the user asks you to create a new git commit, follow these steps carefully:
 - Review the draft message to ensure it accurately reflects the changes and their purpose
 </commit_analysis>
 
-4. Create the commit with a message ending with:
+4. Create the commit with a message`, bannedCommandsStr, MaxOutputLength)
+
+	// Add co-authoring instructions if enabled
+	if b.config != nil && b.config.IsGitCoAuthoringEnabled() {
+		baseDescription += ` ending with:
 💘 Generated with Crush
 Co-Authored-By: Crush <crush@charm.land>
 
@@ -205,7 +211,20 @@ git commit -m "$(cat <<'EOF'
  Co-Authored-By: 💘 Crush <crush@charm.land>
  EOF
  )"
-</example>
+</example>`
+	} else {
+		baseDescription += `:
+
+- In order to ensure good formatting, ALWAYS pass the commit message via a HEREDOC, a la this example:
+<example>
+git commit -m "$(cat <<'EOF'
+ Commit message here.
+ EOF
+ )"
+</example>`
+	}
+
+	baseDescription += `
 
 5. If the commit fails due to pre-commit hook changes, retry the commit ONCE to include these automated changes. If it fails again, it usually means a pre-commit hook is preventing the commit. If the commit succeeds but you notice that files were modified by the pre-commit hook, you MUST amend your commit to include them.
 
@@ -262,16 +281,25 @@ gh pr create --title "the pr title" --body "$(cat <<'EOF'
 <1-3 bullet points>
 
 ## Test plan
-[Checklist of TODOs for testing the pull request...]
+[Checklist of TODOs for testing the pull request...]`
 
-💘 Generated with Crush
+	// Add co-authoring to PR if enabled
+	if b.config != nil && b.config.IsGitCoAuthoringEnabled() {
+		baseDescription += `
+
+💘 Generated with Crush`
+	}
+
+	baseDescription += `
 EOF
 )"
 </example>
 
 Important:
 - Return an empty response - the user will see the gh output directly
-- Never update git config`, bannedCommandsStr, MaxOutputLength)
+- Never update git config`
+
+	return baseDescription
 }
 
 func blockFuncs() []shell.BlockFunc {
@@ -324,7 +352,7 @@ func (b *bashTool) Name() string {
 func (b *bashTool) Info() ToolInfo {
 	return ToolInfo{
 		Name:        BashToolName,
-		Description: bashDescription(),
+		Description: b.bashDescription(),
 		Parameters: map[string]any{
 			"command": map[string]any{
 				"type":        "string",
