@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/crush/internal/config"
 	"github.com/charmbracelet/crush/internal/permission"
 	"github.com/charmbracelet/crush/internal/shell"
 )
@@ -30,6 +31,7 @@ type BashResponseMetadata struct {
 type bashTool struct {
 	permissions permission.Service
 	workingDir  string
+	config      *config.Config
 }
 
 const (
@@ -303,7 +305,7 @@ func blockFuncs() []shell.BlockFunc {
 	}
 }
 
-func NewBashTool(permission permission.Service, workingDir string) BaseTool {
+func NewBashTool(permission permission.Service, workingDir string, cfg *config.Config) BaseTool {
 	// Set up command blocking on the persistent shell
 	persistentShell := shell.GetPersistentShell(workingDir)
 	persistentShell.SetBlockFuncs(blockFuncs())
@@ -311,6 +313,7 @@ func NewBashTool(permission permission.Service, workingDir string) BaseTool {
 	return &bashTool{
 		permissions: permission,
 		workingDir:  workingDir,
+		config:      cfg,
 	}
 }
 
