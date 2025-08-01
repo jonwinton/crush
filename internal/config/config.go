@@ -139,6 +139,7 @@ type Options struct {
 	Debug                bool        `json:"debug,omitempty" jsonschema:"description=Enable debug logging,default=false"`
 	DebugLSP             bool        `json:"debug_lsp,omitempty" jsonschema:"description=Enable debug logging for LSP servers,default=false"`
 	DisableAutoSummarize bool        `json:"disable_auto_summarize,omitempty" jsonschema:"description=Disable automatic conversation summarization,default=false"`
+	EnableGitCoAuthoring *bool       `json:"enable_git_co_authoring,omitempty" jsonschema:"description=Enable git co-authoring with Crush in commit messages,default=true"`
 	DataDirectory        string      `json:"data_directory,omitempty" jsonschema:"description=Directory for storing application data (relative to working directory),default=.crush,example=.crush"` // Relative to the cwd
 }
 
@@ -339,6 +340,20 @@ func (c *Config) SetCompactMode(enabled bool) error {
 	}
 	c.Options.TUI.CompactMode = enabled
 	return c.SetConfigField("options.tui.compact_mode", enabled)
+}
+
+func (c *Config) IsGitCoAuthoringEnabled() bool {
+	if c.Options == nil {
+		return true // Default to enabled for backward compatibility
+	}
+
+	// If the pointer is nil, use the default (true)
+	if c.Options.EnableGitCoAuthoring == nil {
+		return true
+	}
+
+	// Return the dereferenced value
+	return *c.Options.EnableGitCoAuthoring
 }
 
 func (c *Config) Resolve(key string) (string, error) {

@@ -229,6 +229,11 @@
           "description": "Disable automatic conversation summarization",
           "default": false
         },
+        "enable_git_co_authoring": {
+          "type": "boolean",
+          "description": "Enable git co-authoring with Crush in commit messages",
+          "default": true
+        },
         "data_directory": {
           "type": "string",
           "description": "Directory for storing application data (relative to working directory)",
